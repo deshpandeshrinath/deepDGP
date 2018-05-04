@@ -15,7 +15,7 @@ import argparse
 
 def parseArgs():
     parser = argparse.ArgumentParser(description='Directory to save model')
-    parser.add_argument('--env_id', action="store", dest="env_id", default='HalfCheetah-v2')
+    parser.add_argument('--env_id', action="store", dest="env_id", default='Pendulum-v0')
     parser.add_argument('--model_dir', action="store", dest="model_dir", default='./model_')
     parser.add_argument('--gamma', action="store", type=float, dest="gamma", default=0.99)
     parser.add_argument('--tau', action="store", type=float, dest="tau", default=0.001)
