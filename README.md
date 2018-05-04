@@ -4,6 +4,10 @@
 We present our implementation of an Reinforcement Learning Algorithm called DeepDGP, presented by [Lillicrap et
 al.](https://arxiv.org/abs/1509.02971).
 
+### Trained [MuJoCo environments](https://gym.openai.com/envs/#mujoco)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/C5tIEuEycJY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
 ### Usage Instruction
 We recommend to use python 3.
 Install necessary dependencies like openAI-gym by
