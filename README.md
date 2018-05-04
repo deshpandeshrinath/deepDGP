@@ -15,6 +15,7 @@ pip3 install tqdm
 ``` python
 cd src
 python3 train.py --env_id='<any openAI-gym continuous environments>'
+--model_dir=../trained_models/
 ```
 
 To run our pretrained models
