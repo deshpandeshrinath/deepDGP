@@ -5,13 +5,19 @@ We present our implementation of an Reinforcement Learning Algorithm called Deep
 al.](https://arxiv.org/abs/1509.02971).
 
 ### Usage Instruction
+We recommend to use python 3.
+Install necessary dependencies like openAI-gym by
+``` python
+pip3 install gym
+pip3 install tensorflow
 
 ``` python
 cd src
-python train.py --env_id=<any openAI-gym continuous environments>
+python3 train.py --env_id='<any openAI-gym continuous environments>'
 ```
 
-To run pretrained models
+To run our pretrained models
 ```
-cd src python run.py --env_id=Pendulum-v0
+cd src
+python3 run.py --env_id=Pendulum-v0
 ```
