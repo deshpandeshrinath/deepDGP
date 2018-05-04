@@ -11,6 +11,13 @@ Install necessary dependencies like openAI-gym by
 pip3 install gym
 pip3 install tensorflow
 pip3 install tqdm
+pip3 install matplotlib
+```
+To train and run [MuJoCo environments](https://gym.openai.com/envs/#mujoco),
+get a one month-trial license from [MuJoCo](http://www.mujoco.org/).
+If you are student with .edu address, you can get 1-year MuJoCo license for
+free.
+
 
 ``` python
 cd src
