@@ -6,6 +6,10 @@ al.](https://arxiv.org/abs/1509.02971).
 
 ### Trained [MuJoCo environments](https://gym.openai.com/envs/#mujoco)
 
+<a href="https://www.youtube.com/embed/C5tIEuEycJY
+" target="_blank"><img src="http://img.youtube.com/vi/C5tIEuEycJY/0.jpg"
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/C5tIEuEycJY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 ### Usage Instruction
