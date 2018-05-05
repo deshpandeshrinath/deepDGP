@@ -21,10 +21,10 @@ ax2.set_xlabel("Train Steps")
 filename = os.path.join(model_dir, "train_stats.npy")
 stats = np.load(filename)
 
-stats[2] = stats[2] + np.abs(np.min(stats[2]))
+#stats[2] = stats[2] + np.abs(np.min(stats[2]))
 total_actor_losses = stats[0]
 total_critic_losses = stats[1]
-rewards = stats[2]/np.max(stats[2])
+rewards = stats[2]#/np.max(stats[2])
 steps = stats[3]
 
 ax.plot(np.arange(len(total_actor_losses)), np.array(total_actor_losses))
