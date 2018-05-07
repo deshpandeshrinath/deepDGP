@@ -50,58 +50,7 @@ python3 run.py --env_id=Pendulum-v0 --model_dir=../trained_models/Pendulum-v0/
 
 - DDPG solves this problem by introducing a variant of actor-critic method.
 
-
-
-## DDPG in Brief
-
 ![Overview](./assets/overview.png)
-
-The agent consists of two neural networks namely actor and critic, which act as
-function approximator.
-
-Actor tries to approximate the best policy which maps a state to optimal action, given by
-
-\begin{equation}
-  \mu (\theta^{\mu}): s_t \to a_t
-\end{equation}
-
-Critic tries to approximate the predict the correct Q value, given by
-\begin{equation}
-  Qc (\theta^{Qc}): s_t, a_t \to Q
-\end{equation}
-
-We make a copy of each of the network and call them target networks.
-We use bellman equations and policy gradients to train actor and critic neural networks.
-Bellman equation given by,
-
-\begin{equation}
-  Q(s_t, a_t)^\pi = r_t + \gamma Q(s_{t+1}, a_{t+1})^\pi,
-\end{equation}
-where \\(Q^\pi\\) represents actual Q value.
-
-Critic is trained using loss function given by
-
-\begin{equation}
- L(\theta^{Qc}) = (Qc - y_t)^2,
-\end{equation}
-
-where \\(y_t\\) is R.H.S. of bellman equation computed using the target networks.
-
-Actor is trained by policy gradients which are given by,
-
-\begin{equation}
- \frac{\delta Qc}{\delta \theta^{\mu}} = \frac{\delta Qc}{\delta a}\frac{\delta a}{\delta \theta^{\mu}},
-\end{equation}
-
-The parameters of target networks are updated slowly based on
-critic and actor, given by
-\begin{eqnarray}
-\theta^{Qc}_{target} = \tau \theta^{Qc} + (1 - \tau) \theta^{Qc}_{target}  \\
-\theta^{\mu}_{target} = \tau \theta^{\mu} + (1 - \tau) \theta^{\mu}_{target}
-
-\end{eqnarray}
-
-
 
 ## Algorithm
 
@@ -111,9 +60,9 @@ critic and actor, given by
 
 3. Actor predicts action based on current state state plus added noise.
 
-4. Receive reward \\(r_t\\) for the action at as well as observations, which results into next state \\(s_{t+1}\\).
+4. Receive reward r_t for the action at as well as observations, which results into next state s_{t+1}.
 
-5. Store this tuple into experience buffer as, \\(e = (s_t, a_t, r_t, s_{t+1})\\)
+5. Store this tuple into experience buffer as, e = (s_t, a_t, r_t, s_{t+1})
 
 6. Repeat this for N times to generate some experience.
 
