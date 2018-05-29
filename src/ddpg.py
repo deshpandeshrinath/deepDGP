@@ -252,7 +252,7 @@ class DDPG:
                     # Start making some random steps
                     for t in range(self.num_rollouts):
                         # Predict next action
-                        if obs is dict:
+                        if type(obs) is dict:
                             current_state = np.reshape(obs['observation'], [1,-1])
                             goal_state = np.reshape(obs['desired_goal'],[1,-1])
                             feed_dict = {
@@ -278,7 +278,7 @@ class DDPG:
                         assert(current_action.shape == self.env.action_space.shape)
 
                         obs, current_reward, done, info = self.env.step(current_action*max_action)
-                        if obs is dict:
+                        if type(obs) is dict:
                             next_state = np.reshape(obs['observation'], [1,-1])
                             #next_goal_state = np.reshape(obs['desired_goal'],[1,-1])
                         else:
@@ -297,6 +297,7 @@ class DDPG:
 
                         if done:
                             # Episode done.
+                            print(episode_reward)
                             epoch_episode_rewards.append(episode_reward)
                             epoch_episode_steps.append(episode_step)
                             episode_reward = 0.
@@ -323,7 +324,7 @@ class DDPG:
                         if self.eval_env is not None:
                             eval_episode_reward = 0.
                             for t_eval in range(self.num_rollouts):
-                                if obs_eval is dict:
+                                if type(obs_eval) is dict:
                                     current_state = np.reshape(obs_eval['observation'], [1,-1])
                                     goal_state = np.reshape(obs_eval['desired_goal'],[1,-1])
                                     feed_dict = {
@@ -393,7 +394,7 @@ class DDPG:
                     eval_episode_reward = 0.
                     # Action Loop
                     while True:
-                        if obs_eval is dict:
+                        if type(obs_eval) is dict:
                             current_state = np.reshape(obs_eval['observation'], [1,-1])
                             goal_state = np.reshape(obs_eval['desired_goal'],[1,-1])
                             feed_dict = {
