@@ -19,6 +19,12 @@ from models import Actor, Critic
 from noise import OU_ActionNoise
 from ReplayBuffer import ReplayBuffer
 
+'''
+TODO:
+1. Batch normalization
+2. Parameter Noise
+'''
+
 class DDPG:
     def __init__(self, env, eval_env=None, params={'tau':0.001, 'gamma':0.99, 'lr_act':0.0001, 'lr_crit':0.001, 'batch_size':32, 'buffer_size': 1000000, 'num_epochs' : 100, 'num_cycles' : 10, 'num_rollouts' : 50, 'train_steps' : 50, 'model_dir' : "./model", 'stddev': 0.3, 'hidden_size':64, 'critic_l2_reg': 0.0}, render_graphs=False):
         self.env = env
@@ -297,7 +303,6 @@ class DDPG:
 
                         if done:
                             # Episode done.
-                            print(episode_reward)
                             epoch_episode_rewards.append(episode_reward)
                             epoch_episode_steps.append(episode_step)
                             episode_reward = 0.

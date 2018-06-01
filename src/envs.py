@@ -42,7 +42,6 @@ class Fourbar(Env):
 
         with open('../dataset.pkl', 'rb') as f:
             self.dataset = pickle.load(f)
-            print(len(self.dataset))
 
         ''' We can do this
         Always start from init params l1 = 1, l2 = 1, l3 = 1, l4 = 0, l5 = 0
@@ -78,7 +77,6 @@ class Fourbar(Env):
         This is because 70 points make non trivial path/motion
         '''
         params, coupler_curves, state = self._load_random_coupler_curves()
-        print(len(coupler_curves.signs))
         task_sign_lens = [len(sign[self.mode + '_sign']) for sign in coupler_curves.signs]
         task = coupler_curves.signs[np.argmax(task_sign_lens)]
         self.task = {self.mode + '_sign': task[self.mode + '_sign']}
@@ -93,7 +91,6 @@ class Fourbar(Env):
         self.params, self.coupler_curves, self.state = self._load_random_coupler_curves()
         self.full_state = np.concatenate((self.state, self.params), axis=0)
         self.full_state = np.concatenate((self.full_state, self.goal), axis=0)
-        print(self.full_state.shape)
         assert self.full_state.shape == (245,)
 
         '''
@@ -291,11 +288,8 @@ class FourbarDataset:
 if __name__ == '__main__':
     fb = Fourbar('path')
     state = fb.reset()
-    print(state.shape)
     for _ in range(100):
         state, reward, _, _ = fb.step(fb.action_space.sample())
-        print(state.shape)
-        print(reward)
         fb.render()
 
 
