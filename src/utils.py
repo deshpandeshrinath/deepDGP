@@ -72,6 +72,7 @@ def signature(x, y, angle, ax=None, ax2=None, ax3=None, label='', steps=100, out
 
     # Normalizing angle
     angle = np.cumsum(diff_angle)
+    normalized_angle = np.copy(angle)
     # Step 1
     """ 1. This step covers any pre-processing required to de-noise and convert
             the input curve to a parametric representation such that the curvature
@@ -163,7 +164,7 @@ def signature(x, y, angle, ax=None, ax2=None, ax3=None, label='', steps=100, out
     if ax3 is not None:
         ax3.plot(path_sign, '*-', ms=4, lw=2)
 
-    return {'path_sign': path_sign, 'motion_sign':motion_sign, 'fixed_path_sign':np.array([curvature, K]), 'fixed_motion_sign':np.array([angle, K])}
+    return {'path_sign': path_sign, 'motion_sign':motion_sign, 'fixed_path_sign':np.array([curvature, K]), 'fixed_motion_sign':np.array([angle, K]), 'normalized_angle':normalized_angle}
 
 def normalized_cross_corelation(sign1, sign2, ax=None, ax2=None):
     """ Obtains similarity between two scaled signals of same wavelength
@@ -449,7 +450,7 @@ class CouplerCurves:
             if len(self.curv1) != 0:
                 self.circuit = not self.circuit
 
-    def finish(self):
+    def finish(self, only_first_curve=False):
         self.curv1 = np.array(self.curv1)
         self.curv2 = np.array(self.curv2)
         self.curv3 = np.array(self.curv3)
@@ -459,18 +460,22 @@ class CouplerCurves:
         self.curv7 = np.array(self.curv7)
         self.curv8 = np.array(self.curv8)
         self.curves = [self.curv1, self.curv2, self.curv3, self.curv4, self.curv5, self.curv6, self.curv7, self.curv8]
-        if len(self.curv1) >= 4:
-            self.signs.append(signature(x=self.curv1[:,0], y=self.curv1[:,1], angle=self.curv1[:,2]))
-            self.signs.append(signature(x=self.curv2[:,0], y=self.curv2[:,1], angle=self.curv2[:,2]))
-        if len(self.curv3) >= 4:
-            self.signs.append(signature(x=self.curv3[:,0], y=self.curv3[:,1], angle=self.curv3[:,2]))
-            self.signs.append(signature(x=self.curv4[:,0], y=self.curv4[:,1], angle=self.curv4[:,2]))
-        if len(self.curv5) >= 4:
-            self.signs.append(signature(x=self.curv5[:,0], y=self.curv5[:,1], angle=self.curv5[:,2]))
-            self.signs.append(signature(x=self.curv6[:,0], y=self.curv6[:,1], angle=self.curv6[:,2]))
-        if len(self.curv7) >= 4:
-            self.signs.append(signature(x=self.curv7[:,0], y=self.curv7[:,1], angle=self.curv7[:,2]))
-            self.signs.append(signature(x=self.curv8[:,0], y=self.curv8[:,1], angle=self.curv8[:,2]))
+        if only_first_curve:
+            if len(self.curv1) >= 4:
+                self.signs.append(signature(x=self.curv1[:,0], y=self.curv1[:,1], angle=self.curv1[:,2]))
+        else:
+            if len(self.curv1) >= 4:
+                self.signs.append(signature(x=self.curv1[:,0], y=self.curv1[:,1], angle=self.curv1[:,2]))
+                self.signs.append(signature(x=self.curv2[:,0], y=self.curv2[:,1], angle=self.curv2[:,2]))
+            if len(self.curv3) >= 4:
+                self.signs.append(signature(x=self.curv3[:,0], y=self.curv3[:,1], angle=self.curv3[:,2]))
+                self.signs.append(signature(x=self.curv4[:,0], y=self.curv4[:,1], angle=self.curv4[:,2]))
+            if len(self.curv5) >= 4:
+                self.signs.append(signature(x=self.curv5[:,0], y=self.curv5[:,1], angle=self.curv5[:,2]))
+                self.signs.append(signature(x=self.curv6[:,0], y=self.curv6[:,1], angle=self.curv6[:,2]))
+            if len(self.curv7) >= 4:
+                self.signs.append(signature(x=self.curv7[:,0], y=self.curv7[:,1], angle=self.curv7[:,2]))
+                self.signs.append(signature(x=self.curv8[:,0], y=self.curv8[:,1], angle=self.curv8[:,2]))
 
     def plot_curves(self, ax, label='', mark='-*'):
         i = 0
@@ -494,16 +499,23 @@ class CouplerCurves:
             i += 1
             ax.plot(self.curv8[:,0], self.curv8[:,1], mark , ms=1,lw=1, label=label+'%d'%i)
 
-def simulate_fourbar(params, timing = None, both_branches=True):
+def simulate_fourbar(params, timing = None, both_branches=True, only_first_curve=False, all_joints=False):
     l1,l2,l3,l4,l5 = params
     coupler_curves = CouplerCurves()
+    full_data = []
     circuit_changed = False
+    if only_first_curve:
+        both_branches = False
     if timing is None:
         timing = np.arange(0.0, 2*np.pi, np.pi/180.0)
     for theta in timing:
-        success, output = fourbar_fk(l1,l2,l3,l4,l5,theta)
+        success, output = fourbar_fk(l1,l2,l3,l4,l5,theta, all_joints=True)
         if success:
-            coupler_curves.push_point(output)
+            coupler_pose = np.array([[output['C'][0][0], output['C'][0][1], output['theta'][0]], [output['C'][1][0], output['C'][1][1], output['theta'][1]]])
+            if all_joints:
+                if coupler_curves.circuit:
+                    full_data.append(output)
+            coupler_curves.push_point(coupler_pose)
             circuit_changed = False
         else:
             if not circuit_changed:
@@ -515,16 +527,22 @@ def simulate_fourbar(params, timing = None, both_branches=True):
         for theta in timing:
             success, output = fourbar_fk(l2,l1,l3,-l4,l5,theta)
             if success:
-                coupler_curves.push_point(output)
+                coupler_pose = np.array([output['C'][0], output['theta'][0], output['C'][1], output['theta'][1]])
+                coupler_curves.push_point(coupler_pose)
+                if all_joints:
+                    full_data.append(output)
                 circuit_changed = False
             else:
                 if not circuit_changed:
                     coupler_curves.change_circuit()
                     circuit_changed = True
-    coupler_curves.finish()
-    return coupler_curves
+    coupler_curves.finish(only_first_curve)
+    if all_joints:
+        return coupler_curves, full_data
+    else:
+        return coupler_curves
 
-def fourbar_fk(l1,l2,l3,l4,l5,theta):
+def fourbar_fk(l1,l2,l3,l4,l5,theta, all_joints=False):
     """ Calculates coupler position and angle (floating link)
         returns a dict of coupler_points and coupler_angles
     """
@@ -556,7 +574,10 @@ def fourbar_fk(l1,l2,l3,l4,l5,theta):
     c1 = getEndPoint(temp, l5, l3_inclination1 + np.pi/2.0)
     temp = getEndPoint((fe+se2)/2, l4, l3_inclination2)
     c2 = getEndPoint(temp, l5, l3_inclination2 + np.pi/2.0)
-    return True, np.array([[c1[0], c1[1], l3_inclination1], [c2[0], c2[1], l3_inclination2]])
+    if all_joints:
+        return True, {'A0': np.array([fg, fg]), 'A1': np.array([sg, sg]), 'B0': np.array([fe, fe]), 'B1': np.array([se1, se2]), 'phi': theta, 'C':np.array([c1, c2]), 'theta': np.array([l3_inclination1, l3_inclination2])}
+    else:
+        return True, np.array([[c1[0], c1[1], l3_inclination1], [c2[0], c2[1], l3_inclination2]])
 
 def getEndPoint(startPoint, length, angle):
     return np.array([startPoint[0] + (length * np.cos(angle)), startPoint[1] + (length * np.sin(angle))]);

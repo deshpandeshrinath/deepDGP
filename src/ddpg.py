@@ -20,7 +20,7 @@ from noise import OU_ActionNoise
 from ReplayBuffer import ReplayBuffer
 
 class DDPG:
-    def __init__(self, env, eval_env=None, params={'tau':0.001, 'gamma':0.99, 'lr_act':0.0001, 'lr_crit':0.001, 'batch_size':32, 'buffer_size': 1000000, 'num_epochs' : 500, 'num_cycles' : 20, 'num_rollouts' : 100, 'train_steps' : 50, 'model_dir' : "./model", 'stddev': 0.3, 'hidden_size':64, 'critic_l2_reg': 0.0}, render_graphs=False):
+    def __init__(self, env, eval_env=None, params={'tau':0.001, 'gamma':0.99, 'lr_act':0.0001, 'lr_crit':0.001, 'batch_size':32, 'buffer_size': 1000000, 'num_epochs' : 100, 'num_cycles' : 10, 'num_rollouts' : 50, 'train_steps' : 50, 'model_dir' : "./model", 'stddev': 0.3, 'hidden_size':64, 'critic_l2_reg': 0.0}, render_graphs=False):
         self.env = env
         self.eval_env = eval_env
         self.tau = params['tau']
