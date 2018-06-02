@@ -38,7 +38,6 @@ class Fourbar(Env):
         self.ax1 = self.fig.add_subplot(111)
         self.line1 = self.ax1.plot(np.arange(1), np.arange(1), 'o', label='Task')[0]
         self.line2 = self.ax1.plot(np.arange(1), np.arange(1), '-', label='Achieved')[0]
-        self.fig.canvas.draw()
 
         with open('../dataset.pkl', 'rb') as f:
             self.dataset = pickle.load(f)
@@ -91,6 +90,7 @@ class Fourbar(Env):
         self.params, self.coupler_curves, self.state = self._load_random_coupler_curves()
         self.full_state = np.concatenate((self.state, self.params), axis=0)
         self.full_state = np.concatenate((self.full_state, self.goal), axis=0)
+        self.is_success = False
         assert self.full_state.shape == (245,)
 
         '''
@@ -105,12 +105,12 @@ class Fourbar(Env):
         self.params[:3] = np.clip(self.params[:3], 0.2, 5)
         self.params[3:5] = np.clip(self.params[3:5], -3, 3)
 
-        self.is_success = False
         self._calculate_state()
         self._evaluate_step()
 
         self.full_state = np.concatenate((self.state, self.params), axis=0)
         self.full_state = np.concatenate((self.full_state, self.goal), axis=0)
+
         '''
         TODO: goal state should be of fixed dimensions, which currently is not.
         for goal based RL algorithms use commented
@@ -171,17 +171,17 @@ class Fourbar(Env):
         if len(self.coupler_curves.signs) != 0:
             if self.mode == 'path': #and len(self.coupler_curves.signs[0]['path_sign'])*1.3 > len(self.task['path_sign']):
                 result = normalized_cross_corelation(self.coupler_curves.signs[0], self.task)
-                self.reward = result['score']
-                if self.reward > 0.99:
+                self.reward = result['score'] - 1
+                if self.reward > -0.02:
                     self.is_success = True
             elif self.mode == 'motion': # and len(self.coupler_curves.signs[0]['motion_sign'])*1.3 > len(self.task['motion_sign']):
-                result = -motion_cross_corelation(self.coupler_curves.signs[0], self.task)
-                self.reward = result['distance']
+                result = motion_cross_corelation(self.coupler_curves.signs[0], self.task)
+                self.reward = - result['distance']
 
                 if self.reward > -0.01:
                     self.is_success = True
         else:
-            self.reward = -1
+            self.reward = -2
 
         if len(self.coupler_curves.signs) == 0:
             self.achieved_goal = None
@@ -200,6 +200,7 @@ class Fourbar(Env):
         self.ax1.legend(loc='best')
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
+        print(self.reward)
         plt.pause(0.1)
 
 class FourbarDataset:

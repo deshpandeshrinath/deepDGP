@@ -367,17 +367,18 @@ class DDPG:
                     fig.canvas.flush_events()
                     plt.pause(1e-7)
 
+                train_stats = np.array([total_actor_losses, total_critic_losses, epoch_episode_rewards, epoch_episode_steps])
+                filename = os.path.join(self.model_dir, "train_stats.npy")
+                if os.path.isfile(filename):
+                    old_stats = np.load(filename)
+                    stats = [np.concatenate((old_stat, new_stat), axis=0) for new_stat, old_stat in zip(train_stats, old_stats)]
+                    np.save(os.path.join(self.model_dir, "train_stats.npy"), stats)
+                else:
+                    np.save(os.path.join(self.model_dir, "train_stats.npy"), train_stats)
+
             duration = time.time() - start_time
             if self.render_graphs:
                 plt.savefig(os.path.join(self.model_dir, "plots.png"))
-            train_stats = np.array([total_actor_losses, total_critic_losses, epoch_episode_rewards, epoch_episode_steps])
-            filename = os.path.join(self.model_dir, "train_stats.npy")
-            if os.path.isfile(filename):
-                old_stats = np.load(filename)
-                stats = [np.concatenate((old_stat, new_stat), axis=0) for new_stat, old_stat in zip(train_stats, old_stats)]
-                np.save(os.path.join(self.model_dir, "train_stats.npy"), stats)
-            else:
-                np.save(os.path.join(self.model_dir, "train_stats.npy"), train_stats)
 
             with open(os.path.join(self.model_dir, "buffer.pkl"), 'wb') as f:
                 pickle.dump(self.buffer, f)
