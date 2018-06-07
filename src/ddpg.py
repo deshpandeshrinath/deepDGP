@@ -254,11 +254,13 @@ class DDPG:
             obs = self.env.reset()
             obs_eval = self.eval_env.reset()
             for i in tqdm(range(self.num_episodes), total = self.num_episodes):
+                done = False
                 while not done:
-                    done = False
-                    for t in range(self.num_rollouts):
+                    t = 0
+                    while t < self.num_rollouts and not done:
                         ''' Predict next action
                         '''
+                        t += 1
                         if type(obs) is dict:
                             current_state = np.reshape(obs['observation'], [1,-1])
                             goal_state = np.reshape(obs['desired_goal'],[1,-1])
@@ -322,38 +324,6 @@ class DDPG:
                     total_actor_losses.append(np.mean(epoch_actor_losses))
                     total_critic_losses.append(np.mean(epoch_critic_losses))
 
-                    # Evaluate
-                    if self.eval_env is not None:
-                        eval_episode_rewards = []
-                        eval_qs = []
-                        if self.eval_env is not None:
-                            eval_episode_reward = 0.
-                            for t_eval in range(self.num_rollouts):
-                                if type(obs_eval) is dict:
-                                    current_state = np.reshape(obs_eval['observation'], [1,-1])
-                                    goal_state = np.reshape(obs_eval['desired_goal'],[1,-1])
-                                    feed_dict = {
-                                    self.current_state: current_state,
-                                    self.goal_state: goal_state
-                                            }
-                                else:
-                                    current_state = np.reshape(obs_eval, [1,-1])
-                                    goal_state = None
-                                    feed_dict = {
-                                    self.current_state: current_state,
-                                            }
-                                eval_action, eval_q = sess.run((self.predicted_current_action, self.predicted_Q_on_predicted_current_action), feed_dict=feed_dict)
-                                eval_action = eval_action[0]
-                                obs_eval, eval_r, eval_done, eval_info = self.eval_env.step(max_action * eval_action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
-                                if render_eval:
-                                    self.eval_env.render()
-                                eval_episode_reward += eval_r
-
-                                eval_qs.append(eval_q)
-                                if eval_done:
-                                    obs_eval = self.eval_env.reset()
-                                    eval_episode_rewards.append(eval_episode_reward)
-                                    eval_episode_reward = 0.
                 '''
                 Saving the model and logistics
                 '''
