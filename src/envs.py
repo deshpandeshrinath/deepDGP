@@ -62,6 +62,7 @@ class Fourbar(Env):
     def _load_random_coupler_curves(self):
         ''' take random params and calculates coupler curves
         '''
+        print('Picking a sample from dataset of %d samples'%len(self.dataset))
         sample = random.sample(self.dataset, 1)[0]
         params = sample['params']
         coupler_curves = sample['coupler_curves']
@@ -75,7 +76,7 @@ class Fourbar(Env):
         Taking part (first 70 points) of a random trajectory as target
         This is because 70 points make non trivial path/motion
         '''
-        params, coupler_curves, state = self._load_random_coupler_curves()
+        self.goal_params, coupler_curves, state = self._load_random_coupler_curves()
         task_sign_lens = [len(sign[self.mode + '_sign']) for sign in coupler_curves.signs]
         task = coupler_curves.signs[np.argmax(task_sign_lens)]
         self.task = {self.mode + '_sign': task[self.mode + '_sign']}
@@ -187,6 +188,11 @@ class Fourbar(Env):
             self.achieved_goal = None
         else:
             self.achieved_goal = self.coupler_curves.signs[0][self.mode + '_sign']
+
+        if self.is_success:
+            print('Synthesis complete for params : {} is {} with error {}.\n'.format(self.goal_params, self.params, -self.reward))
+            with open('synth_stats.txt', 'a') as f:
+                f.write('Synthesis complete for params : {} is {} with error {}.\n'.format(self.goal_params, self.params, -self.reward))
 
     def render(self):
         ''' Should render fourbar and its coupler curve

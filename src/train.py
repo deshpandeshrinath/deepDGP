@@ -16,7 +16,7 @@ from envs import Fourbar
 
 def parseArgs():
     parser = argparse.ArgumentParser(description='Directory to save model')
-    parser.add_argument('--env_id', action="store", dest="env_id", default='Pendulum-v0', help='OpenAI-Gym Env ID')
+    parser.add_argument('--env_id', action="store", dest="env_id", default='path', help='OpenAI-Gym Env ID')
     parser.add_argument('--model_dir', action="store", dest="model_dir", default='../trained_models/')
     parser.add_argument('--gamma', action="store", type=float, dest="gamma", default=0.99, help='default 0.99')
     parser.add_argument('--tau', action="store", type=float, dest="tau", default=0.001, help='default 0.001')
@@ -27,10 +27,10 @@ def parseArgs():
     parser.add_argument('--critic_l2_reg', action="store", type=float, dest="critic_l2_reg", default=1e-2, help='default 0.01')
     parser.add_argument('--num_rollouts', action="store", type=int, dest="num_rollouts", default=50, help='default 50')
     parser.add_argument('--num_epochs', action="store", type=int, dest="num_epochs", default=100, help='default 100')
-    parser.add_argument('--num_cycles', action="store", type=int, dest="num_cycles", default=10, help='default 10')
+    parser.add_argument('--num_cycles', action="store", type=int, dest="num_cycles", default=50, help='default 50')
     parser.add_argument('--train_steps', action="store", type=int, dest="train_steps", default=50, help='default 50')
     parser.add_argument('--stddev', action="store", type=float, dest="stddev", default=0.1, help='default 0.1')
-    parser.add_argument('--hidden_size', action="store", type=int, dest="hidden_size", default=64, help='default 64')
+    parser.add_argument('--hidden_size', action="store", type=int, dest="hidden_size", default=128, help='default 64')
     parser.add_argument('-version', action="store", dest="version", default='', help='default is blank')
     return parser.parse_args()
 
@@ -53,4 +53,3 @@ if __name__ == '__main__':
         eval_env = gym.make(env_id)
     algo = DDPG(env, eval_env, params)
     algo.train(render=False, render_eval=False)
-    algo.play(render_eval=True)
