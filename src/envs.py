@@ -5,6 +5,7 @@ from utils import simulate_fourbar, getMotionError, getPathError, normalized_cro
 import random
 import pickle
 from scipy.interpolate import BSpline, splprep, splev
+import copy
 
 class Env:
     def __init__(self, env_id):
@@ -62,7 +63,6 @@ class Fourbar(Env):
     def _load_random_coupler_curves(self):
         ''' take random params and calculates coupler curves
         '''
-        print('Picking a sample from dataset of %d samples'%len(self.dataset))
         sample = random.sample(self.dataset, 1)[0]
         params = sample['params']
         coupler_curves = sample['coupler_curves']
@@ -190,7 +190,6 @@ class Fourbar(Env):
             self.achieved_goal = self.coupler_curves.signs[0][self.mode + '_sign']
 
         if self.is_success:
-            print('Synthesis complete for params : {} is {} with error {}.\n'.format(self.goal_params, self.params, -self.reward))
             with open('synth_stats.txt', 'a') as f:
                 f.write('Synthesis complete for params : {} is {} with error {}.\n'.format(self.goal_params, self.params, -self.reward))
 
@@ -237,7 +236,7 @@ class FourbarDataset:
                     self.params= np.array([1, 1, 1, 0, 0])
                 success = self.calculate_state()
                 if success:
-                    self.dataset.append({'params': self.params, 'coupler_curves': self.coupler_curves, 'state': self.state})
+                    self.dataset.append({'params': np.copy(self.params), 'coupler_curves': self.coupler_curves, 'state': self.state})
 
         return self.dataset
 
