@@ -25,10 +25,11 @@ def parseArgs():
     parser.add_argument('--batch_size', action="store", type=int, dest="batch_size", default=64, help='default 64')
     parser.add_argument('--buffer_size', action="store", type=int, dest="buffer_size", default=1e5, help='default 100000')
     parser.add_argument('--critic_l2_reg', action="store", type=float, dest="critic_l2_reg", default=1e-2, help='default 0.01')
-    parser.add_argument('--num_rollouts', action="store", type=int, dest="num_rollouts", default=50, help='default 50')
-    parser.add_argument('--num_epochs', action="store", type=int, dest="num_epochs", default=100, help='default 100')
-    parser.add_argument('--num_cycles', action="store", type=int, dest="num_cycles", default=50, help='default 50')
-    parser.add_argument('--train_steps', action="store", type=int, dest="train_steps", default=50, help='default 50')
+    parser.add_argument('--num_rollouts', action="store", type=int, dest="num_rollouts", default=10, help='default 10')
+    parser.add_argument('--num_epochs', action="store", type=int, dest="num_epochs", default=500, help='default 500')
+    parser.add_argument('--num_cycles', action="store", type=int, dest="num_cycles", default=20, help='default 20')
+    parser.add_argument('--num_episodes', action="store", type=int, dest="num_episodes", default=100, help='default 100')
+    parser.add_argument('--train_steps', action="store", type=int, dest="train_steps", default=10, help='default 10')
     parser.add_argument('--stddev', action="store", type=float, dest="stddev", default=0.1, help='default 0.1')
     parser.add_argument('--hidden_size', action="store", type=int, dest="hidden_size", default=128, help='default 64')
     parser.add_argument('-version', action="store", dest="version", default='', help='default is blank')
@@ -39,7 +40,7 @@ FLAGS = parseArgs()
 env_id = FLAGS.env_id
 model_dir = FLAGS.model_dir
 
-params={'tau':FLAGS.tau, 'gamma':FLAGS.gamma, 'lr_act':FLAGS.lr_act, 'lr_crit':FLAGS.lr_crit, 'batch_size':FLAGS.batch_size, 'buffer_size': FLAGS.buffer_size, 'num_epochs' : FLAGS.num_epochs, 'num_cycles' : FLAGS.num_cycles, 'num_rollouts' : FLAGS.num_rollouts, 'train_steps' : FLAGS.train_steps, 'model_dir' : FLAGS.model_dir + FLAGS.env_id + FLAGS.version, 'stddev': FLAGS.stddev, 'hidden_size':FLAGS.hidden_size, 'critic_l2_reg':FLAGS.critic_l2_reg}
+params={'tau':FLAGS.tau, 'gamma':FLAGS.gamma, 'lr_act':FLAGS.lr_act, 'lr_crit':FLAGS.lr_crit, 'batch_size':FLAGS.batch_size, 'buffer_size': FLAGS.buffer_size, 'num_epochs' : FLAGS.num_epochs, 'num_cycles' : FLAGS.num_cycles, 'num_rollouts' : FLAGS.num_rollouts, 'train_steps' : FLAGS.train_steps, 'model_dir' : FLAGS.model_dir + FLAGS.env_id + FLAGS.version, 'stddev': FLAGS.stddev, 'hidden_size':FLAGS.hidden_size, 'critic_l2_reg':FLAGS.critic_l2_reg, 'num_episodes': num_episodes}
 
 if __name__ == '__main__':
     if env_id == 'path':

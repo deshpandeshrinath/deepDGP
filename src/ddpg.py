@@ -37,6 +37,7 @@ class DDPG:
         self.num_rollouts = params['num_rollouts']
         self.num_epochs = params['num_epochs']
         self.num_cycles = params['num_cycles']
+        self.num_episodes = params['num_episodes']
         self.train_steps = params['train_steps']
         self.model_dir = params['model_dir']
         # Std Deviation of noise
@@ -219,14 +220,13 @@ class DDPG:
         start_time = time.time()
         total_actor_losses = []
         total_critic_losses = []
-        epoch_episode_rewards = []
-        epoch_episode_steps = []
+        total_episode_rewards = []
+        total_episode_steps = []
         #epoch_episode_eval_rewards = []
         #epoch_episode_eval_steps = []
         epoch_start_time = time.time()
         epoch_actions = []
         epoch_qs = []
-        epoch_episodes = 0
         max_action = self.env.action_space.high
         if self.render_graphs:
             plt.ion()
@@ -253,11 +253,12 @@ class DDPG:
             sess.run(self.target_init_updates)
             obs = self.env.reset()
             obs_eval = self.eval_env.reset()
-            for i in tqdm(range(self.num_epochs), total = self.num_epochs):
-                for j in range(self.num_cycles):
-                    # Start making some random steps
+            for i in tqdm(range(self.num_episodes), total = self.num_episodes):
+                while not done:
+                    done = False
                     for t in range(self.num_rollouts):
-                        # Predict next action
+                        ''' Predict next action
+                        '''
                         if type(obs) is dict:
                             current_state = np.reshape(obs['observation'], [1,-1])
                             goal_state = np.reshape(obs['desired_goal'],[1,-1])
@@ -303,11 +304,10 @@ class DDPG:
 
                         if done:
                             # Episode done.
-                            epoch_episode_rewards.append(episode_reward)
-                            epoch_episode_steps.append(episode_step)
+                            total_episode_rewards.append(episode_reward)
+                            total_episode_steps.append(episode_step)
                             episode_reward = 0.
                             episode_step = 0
-                            epoch_episodes += 1
 
                             obs = self.env.reset()
                             self.action_noise.reset()
@@ -354,6 +354,9 @@ class DDPG:
                                     obs_eval = self.eval_env.reset()
                                     eval_episode_rewards.append(eval_episode_reward)
                                     eval_episode_reward = 0.
+                '''
+                Saving the model and logistics
+                '''
                 self.saver.save(sess, os.path.join(self.model_dir, "model.ckpt"))
 
                 if self.render_graphs:
@@ -367,7 +370,7 @@ class DDPG:
                     fig.canvas.flush_events()
                     plt.pause(1e-7)
 
-                train_stats = np.array([total_actor_losses, total_critic_losses, epoch_episode_rewards, epoch_episode_steps])
+                train_stats = np.array([total_actor_losses, total_critic_losses, total_episode_rewards, total_episode_steps])
                 filename = os.path.join(self.model_dir, "train_stats.npy")
                 if os.path.isfile(filename):
                     old_stats = np.load(filename)
@@ -384,7 +387,7 @@ class DDPG:
                 pickle.dump(self.buffer, f)
                 f.close()
             print(duration)
-            print(np.mean(epoch_episode_rewards))
+            print(np.mean(total_episode_rewards))
 
     def play(self, render_eval=True):
         #tf.reset_default_graph()
