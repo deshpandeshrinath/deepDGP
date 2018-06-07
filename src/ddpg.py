@@ -227,7 +227,6 @@ class DDPG:
         epoch_start_time = time.time()
         epoch_actions = []
         epoch_qs = []
-        max_action = self.env.action_space.high
         if self.render_graphs:
             plt.ion()
             fig = plt.figure()
@@ -286,7 +285,7 @@ class DDPG:
 
                         assert(current_action.shape == self.env.action_space.shape)
 
-                        obs, current_reward, done, info = self.env.step(current_action*max_action)
+                        obs, current_reward, done, info = self.env.step(current_action)
                         if type(obs) is dict:
                             next_state = np.reshape(obs['observation'], [1,-1])
                             #next_goal_state = np.reshape(obs['desired_goal'],[1,-1])
@@ -362,7 +361,6 @@ class DDPG:
     def play(self, render_eval=True):
         #tf.reset_default_graph()
         #saver = tf.train.import_meta_graph(os.path.join(self.model_dir, "model.meta"))
-        max_action = self.eval_env.action_space.high
         with tf.Session() as sess:
             self.saver.restore(sess, os.path.join(self.model_dir, "model.ckpt"))
             obs_eval = self.eval_env.reset()
@@ -389,7 +387,8 @@ class DDPG:
 
                         eval_action, eval_q = sess.run((self.predicted_current_action, self.predicted_Q_on_predicted_current_action), feed_dict=feed_dict)
                         eval_action = eval_action[0]
-                        obs_eval, eval_r, eval_done, eval_info = self.eval_env.step(max_action * eval_action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
+                        eval_action = np.clip(eval_action, self.eval_env.action_space.low, self.eval_env.action_space.high)
+                        obs_eval, eval_r, eval_done, eval_info = self.eval_env.step(eval_action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
                         if render_eval:
                             self.eval_env.render()
                         eval_episode_reward += eval_r

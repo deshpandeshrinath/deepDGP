@@ -18,7 +18,7 @@ Create a function that computes a bunch of random valid fourbar parameters and s
 class Fourbar(Env):
     ''' Fourbar environment which tries solve path generation problem
     '''
-    def __init__(self, mode='path', state_is='coordinates', compare_all_branches=False):
+    def __init__(self, mode='path', state_is='coordinates', compare_all_branches=False, version='reinit'):
         super(Fourbar, self).__init__(env_id='Fourbar-'+mode)
         self.mode = mode
         '''
@@ -39,6 +39,7 @@ class Fourbar(Env):
         self.ax1 = self.fig.add_subplot(111)
         self.line1 = self.ax1.plot(np.arange(1), np.arange(1), 'o', label='Task')[0]
         self.line2 = self.ax1.plot(np.arange(1), np.arange(1), '-', label='Achieved')[0]
+        self.version = version
 
         with open('../dataset.pkl', 'rb') as f:
             self.dataset = pickle.load(f)
@@ -76,6 +77,7 @@ class Fourbar(Env):
         Taking part (first 70 points) of a random trajectory as target
         This is because 70 points make non trivial path/motion
         '''
+        self.steps = 0
         self.goal_params, coupler_curves, state = self._load_random_coupler_curves()
         task_sign_lens = [len(sign[self.mode + '_sign']) for sign in coupler_curves.signs]
         task = coupler_curves.signs[np.argmax(task_sign_lens)]
@@ -87,11 +89,13 @@ class Fourbar(Env):
         Reinitializing coupler curves
         Evaluating coupler curves
         '''
-        #self._load_init_data()
-        self.params, self.coupler_curves, self.state = self._load_random_coupler_curves()
+        if self.version == 'default':
+            self.params, self.coupler_curves, self.state = self._load_random_coupler_curves()
+        else:
+            self._load_init_data()
         self.full_state = np.concatenate((self.state, self.params), axis=0)
         self.full_state = np.concatenate((self.full_state, self.goal), axis=0)
-        self.is_success = False
+        self.episode_done = False
         assert self.full_state.shape == (245,)
 
         '''
@@ -102,23 +106,26 @@ class Fourbar(Env):
         return self.full_state
 
     def step(self, action):
+        self.steps += 1
         self.params = self.params + action
         self.params[:3] = np.clip(self.params[:3], 0.2, 5)
         self.params[3:5] = np.clip(self.params[3:5], -3, 3)
 
         self._calculate_state()
         self._evaluate_step()
+        is_sucess = self.episode_done
 
         self.full_state = np.concatenate((self.state, self.params), axis=0)
         self.full_state = np.concatenate((self.full_state, self.goal), axis=0)
 
+        if self.steps > 1000:
+            self.episode_done = True
         '''
         TODO: goal state should be of fixed dimensions, which currently is not.
         for goal based RL algorithms use commented
         '''
-        #return ({'observation': self.state, 'achieved_goal':self.achieved_goal, 'desired_goal':self.task[self.mode + '_sign']}, self.reward, self.is_success, {'is_success': self.is_success})
 
-        return (self.full_state, self.reward, self.is_success, {'is_success': self.is_success})
+        return (self.full_state, self.reward, self.episode_done, {'is_sucess': is_sucess})
 
     def _calculate_state(self):
         if self._compare_all_branches:
@@ -174,13 +181,13 @@ class Fourbar(Env):
                 result = normalized_cross_corelation(self.coupler_curves.signs[0], self.task)
                 self.reward = result['score'] - 1
                 if self.reward > -0.02:
-                    self.is_success = True
+                    self.episode_done = True
             elif self.mode == 'motion': # and len(self.coupler_curves.signs[0]['motion_sign'])*1.3 > len(self.task['motion_sign']):
                 result = motion_cross_corelation(self.coupler_curves.signs[0], self.task)
                 self.reward = - result['distance']
 
                 if self.reward > -0.01:
-                    self.is_success = True
+                    self.episode_done = True
         else:
             self.reward = -2
 
@@ -189,7 +196,7 @@ class Fourbar(Env):
         else:
             self.achieved_goal = self.coupler_curves.signs[0][self.mode + '_sign']
 
-        if self.is_success:
+        if self.episode_done:
             with open('synth_stats.txt', 'a') as f:
                 f.write('Synthesis complete for params : {} is {} with error {}.\n'.format(self.goal_params, self.params, -self.reward))
 
