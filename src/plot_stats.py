@@ -32,10 +32,15 @@ ax2.plot(np.arange(len(total_critic_losses)), np.array(total_critic_losses))
 
 
 fig2 = plt.figure()
-ax3 = fig2.add_subplot(111)
+ax3 = fig2.add_subplot(211)
 ax3.set_title("Rewards per Episode")
 ax3.set_xlabel("Episodes")
 ax3.plot(np.arange(len(rewards)), np.array(rewards))
+
+ax4 = fig2.add_subplot(212)
+ax4.set_title("Steps per Reward")
+ax4.set_xlabel("Episodes")
+ax4.plot(np.arange(len(steps)), np.array(steps))
 
 plt.show()
 

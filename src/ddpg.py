@@ -218,10 +218,11 @@ class DDPG:
 
         epoch = 0
         start_time = time.time()
-        total_actor_losses = []
-        total_critic_losses = []
-        total_episode_rewards = []
-        total_episode_steps = []
+        filename = os.path.join(self.model_dir, "train_stats.npy")
+        if os.path.isfile(filename):
+            stats = np.load(filename).tolist()
+        else:
+            stats = [[],[],[],[]]
         #epoch_episode_eval_rewards = []
         #epoch_episode_eval_steps = []
         epoch_start_time = time.time()
@@ -305,8 +306,8 @@ class DDPG:
 
                         if done:
                             # Episode done.
-                            total_episode_rewards.append(episode_reward)
-                            total_episode_steps.append(episode_step)
+                            stats[2].append(episode_reward)
+                            stats[3].append(episode_step)
                             episode_reward = 0.
                             episode_step = 0
 
@@ -320,8 +321,8 @@ class DDPG:
                         critic_loss, actor_loss = self.train_from_batch(sess)
                         epoch_actor_losses.append(actor_loss)
                         epoch_critic_losses.append(critic_loss)
-                    total_actor_losses.append(np.mean(epoch_actor_losses))
-                    total_critic_losses.append(np.mean(epoch_critic_losses))
+                    stats[0].append(np.mean(epoch_actor_losses))
+                    stats[1].append(np.mean(epoch_critic_losses))
 
                 '''
                 Saving the model and logistics
@@ -333,20 +334,13 @@ class DDPG:
                     ax2.autoscale_view()
                     ax.relim()
                     ax2.relim()
-                    line.set_data(np.arange(len(total_actor_losses)), np.array(total_actor_losses))
-                    line2.set_data(np.arange(len(total_critic_losses)), np.array(total_critic_losses))
+                    line.set_data(np.arange(len(stats[0])), np.array(stats[0]))
+                    line2.set_data(np.arange(len(stats[1])), np.array(stats[0]))
                     fig.canvas.draw()
                     fig.canvas.flush_events()
                     plt.pause(1e-7)
 
-                train_stats = np.array([total_actor_losses, total_critic_losses, total_episode_rewards, total_episode_steps])
-                filename = os.path.join(self.model_dir, "train_stats.npy")
-                if os.path.isfile(filename):
-                    old_stats = np.load(filename)
-                    stats = [np.concatenate((old_stat, new_stat), axis=0) for new_stat, old_stat in zip(train_stats, old_stats)]
-                    np.save(os.path.join(self.model_dir, "train_stats.npy"), stats)
-                else:
-                    np.save(os.path.join(self.model_dir, "train_stats.npy"), train_stats)
+                np.save(filename, stats)
 
             duration = time.time() - start_time
             if self.render_graphs:
@@ -356,7 +350,7 @@ class DDPG:
                 pickle.dump(self.buffer, f)
                 f.close()
             print(duration)
-            print(np.mean(total_episode_rewards))
+            print(np.mean(stats[2]))
 
     def play(self, render_eval=True):
         #tf.reset_default_graph()

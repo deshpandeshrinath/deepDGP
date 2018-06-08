@@ -22,7 +22,7 @@ def parseArgs():
     parser.add_argument('--tau', action="store", type=float, dest="tau", default=0.001, help='default 0.001')
     parser.add_argument('--lr_crit', action="store", type=float, dest="lr_crit", default=0.001, help='default 0.001')
     parser.add_argument('--lr_act', action="store", type=float, dest="lr_act", default=0.0001, help='default 0.0001')
-    parser.add_argument('--batch_size', action="store", type=int, dest="batch_size", default=64, help='default 64')
+    parser.add_argument('--batch_size', action="store", type=int, dest="batch_size", default=256, help='default 256')
     parser.add_argument('--buffer_size', action="store", type=int, dest="buffer_size", default=1e5, help='default 100000')
     parser.add_argument('--critic_l2_reg', action="store", type=float, dest="critic_l2_reg", default=1e-2, help='default 0.01')
     parser.add_argument('--num_rollouts', action="store", type=int, dest="num_rollouts", default=10, help='default 10')
