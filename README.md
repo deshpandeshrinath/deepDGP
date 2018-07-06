@@ -4,7 +4,7 @@
 We present our implementation of an Reinforcement Learning Algorithm called DeepDGP, presented by [Lillicrap et
 al.](https://arxiv.org/abs/1509.02971).
 
-For more details refer to my [blog post](https://deshpandeshrinath.github.io/blog/2018/05/05/DDPG).
+For more details, please refer to my [blog post](https://deshpandeshrinath.github.io/blog/2018/05/05/DDPG).
 
 ### Trained [MuJoCo environments](https://gym.openai.com/envs/#mujoco)
 
