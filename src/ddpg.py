@@ -1,5 +1,5 @@
-import tensorflow as tf
-import tensorflow.contrib as tc
+import tensorflow.compat.v1 as tf
+import tf_slim as tc
 import os
 from copy import copy
 import time
@@ -21,6 +21,7 @@ from ReplayBuffer import ReplayBuffer
 
 class DDPG:
     def __init__(self, env, eval_env=None, params={'tau':0.001, 'gamma':0.99, 'lr_act':0.0001, 'lr_crit':0.001, 'batch_size':32, 'buffer_size': 1000000, 'num_epochs' : 500, 'num_cycles' : 20, 'num_rollouts' : 100, 'train_steps' : 50, 'model_dir' : "./model", 'stddev': 0.3, 'hidden_size':64, 'critic_l2_reg': 0.0}, render_graphs=False):
+        tf.disable_v2_behavior() 
         self.env = env
         self.eval_env = eval_env
         self.tau = params['tau']
@@ -133,8 +134,8 @@ class DDPG:
             for var in critic_reg_vars:
                 print('  regularizing: {}'.format(var.name))
             print('  applying l2 regularization with {}'.format(self.critic_l2_reg))
-            critic_reg = tc.layers.apply_regularization(
-                tc.layers.l2_regularizer(self.critic_l2_reg),
+            critic_reg = tc.apply_regularization(
+                tc.l2_regularizer(self.critic_l2_reg),
                 weights_list=critic_reg_vars
             )
             self.critic_loss += critic_reg
@@ -202,7 +203,7 @@ class DDPG:
         })
         return critic_loss, actor_loss
 
-    def train(self, render=False, render_eval=True):
+    def train(self, render=False, render_eval=False):
         done = False
         episode_reward = 0.
         episode_step = 0

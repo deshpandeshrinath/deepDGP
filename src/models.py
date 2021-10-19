@@ -1,5 +1,5 @@
-import tensorflow as tf
-import tensorflow.contrib as tc
+import tensorflow.compat.v1 as tf
+import tf_slim as tc
 import numpy as np
 
 class Model:
